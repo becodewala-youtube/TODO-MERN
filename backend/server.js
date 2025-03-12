@@ -15,15 +15,13 @@ connectDB();
 
 const app = express();
 
-// CORS configuration
+// CORS configuration to allow requests from any origin
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'development' 
-    ? 'http://localhost:5173'  // For local development
-    : process.env.FRONTEND_URL || 'https://todo-mern-becodewala.vercel.app',  // For production frontend URL
-  credentials: true,  // Allow cookies/credentials in requests
+  origin: '*',  // Allow all origins
+  credentials: true,  // Allow credentials (cookies, headers, etc.)
 };
 
-// Apply CORS middleware to handle preflight and actual requests
+// Apply CORS middleware
 app.use(cors(corsOptions));
 
 // Middleware to parse JSON and URL-encoded data
