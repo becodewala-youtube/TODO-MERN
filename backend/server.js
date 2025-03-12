@@ -18,7 +18,7 @@ const app = express();
 // CORS configuration
 const corsOptions = {
   origin: 'https://todo-mern-becodewala.vercel.app', // Allow requests from your frontend
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allowed HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
   credentials: true, // Enable cookies and authentication data
 };
@@ -36,6 +36,9 @@ app.use(cookieParser());
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Start the server
 app.listen(port, () => {
