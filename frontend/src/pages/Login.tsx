@@ -2,15 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../store/slices/authSlice';
-import { RootState } from '../store';
+import { RootState, AppDispatch } from '../store';
+import { AxiosError } from 'axios'; // Import AxiosError from Axios
+
+// Define a type for the error response data
+interface ErrorResponse {
+  message: string;
+  // Add other fields if necessary
+}
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(''); // State for error message
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>(); // Correctly typed dispatch
   const navigate = useNavigate();
-  const { loading, error, user } = useSelector((state: RootState) => state.auth);
+  const { loading, user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     // Redirect if user is already logged in
@@ -25,13 +32,17 @@ const Login = () => {
     try {
       const result = await dispatch(login({ email, password }));
       if (login.fulfilled.match(result)) {
-        navigate('/');
+        navigate('/');  // Navigate on successful login
       } else {
         // If login fails, set the error message
         setErrorMessage('Invalid credentials');
       }
     } catch (err) {
-      if (err?.response?.data?.message === 'User already exists') {
+      // Type the error as AxiosError<ErrorResponse>
+      const axiosError = err as AxiosError<ErrorResponse>;
+
+      // Now TypeScript knows that axiosError.response.data.message exists
+      if (axiosError.response?.data?.message === 'User already exists') {
         setErrorMessage('User already exists');
       } else {
         setErrorMessage('An error occurred. Please try again.');

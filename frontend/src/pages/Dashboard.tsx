@@ -1,21 +1,22 @@
+// src/pages/Dashboard.tsx
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { PlusCircle, Calendar, AlertCircle } from 'lucide-react';
-import { fetchTasks, updateTask } from '../store/slices/taskSlice';
-import { RootState } from '../store';
+import { fetchTasks } from '../store/slices/taskSlice';  // Removed updateTask since it's unused
+import { RootState, AppDispatch } from '../store'; // Import AppDispatch for correct typing
 import TaskModal from '../components/TaskModal';
 import TaskCard from '../components/TaskCard';
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const dispatch = useDispatch();
+  const [selectedTask, setSelectedTask] = useState<any>(null); // Explicitly typing as any or you can create a task type
+  const dispatch = useDispatch<AppDispatch>(); // Correctly typing dispatch
 
   const { tasks = [], loading } = useSelector((state: RootState) => state.tasks);
   const { isDark } = useSelector((state: RootState) => state.theme);
 
   useEffect(() => {
-    dispatch(fetchTasks());
+    dispatch(fetchTasks());  // Dispatching correctly typed async action
   }, [dispatch]);
 
   const openCreateModal = () => {
@@ -23,7 +24,7 @@ const Dashboard = () => {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (task) => {
+  const openEditModal = (task: any) => {  // Typing the parameter explicitly (you could also use Task interface)
     setSelectedTask(task);
     setIsModalOpen(true);
   };

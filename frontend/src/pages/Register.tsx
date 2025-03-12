@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { RootState, useAppDispatch } from '../store'; // Correct import for useAppDispatch
 import { register } from '../store/slices/authSlice';
-import { RootState } from '../store';
+import { AxiosError } from 'axios'; // Import AxiosError for correct error handling
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -10,9 +11,16 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch(); // Use typed dispatch hook
   const navigate = useNavigate();
   const { loading, error } = useSelector((state: RootState) => state.auth);
+
+// Define a type for the error response data
+interface ErrorResponse {
+  message: string;
+  // You can add more properties if the API returns additional data
+}
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,9 +31,14 @@ const Register = () => {
       return;
     }
 
-    const result = await dispatch(register({ name, email, password }));
-    if (register.fulfilled.match(result)) {
-      navigate('/');
+    try {
+      const result = await dispatch(register({ name, email, password }));
+      if (register.fulfilled.match(result)) {
+        navigate('/');
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<ErrorResponse>; // Correct error typing
+      setPasswordError(axiosError?.response?.data?.message || 'An error occurred');
     }
   };
 

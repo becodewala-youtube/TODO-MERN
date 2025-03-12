@@ -1,3 +1,4 @@
+// store/slices/taskSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -23,6 +24,7 @@ const initialState: TaskState = {
   error: null,
 };
 
+// Fetch tasks from backend
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/tasks`, {
     withCredentials: true,
@@ -30,28 +32,33 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
   return data;
 });
 
+// Create a new task
 export const createTask = createAsyncThunk(
   'tasks/createTask',
   async (task: Omit<Task, '_id' | 'order'>) => {
-    const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}`, task, {
+    const { data } = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/tasks`, task, {
       withCredentials: true,
     });
     return data;
   }
 );
 
+// Update an existing task
 export const updateTask = createAsyncThunk(
   'tasks/updateTask',
   async ({ id, task }: { id: string; task: Partial<Task> }) => {
+    // Make sure status is either 'pending' or 'completed'
+    const updatedTask = { ...task, status: task.status as 'pending' | 'completed' };
     const { data } = await axios.put(
       `${import.meta.env.VITE_BACKEND_URL}/api/tasks/${id}`,
-      task,
+      updatedTask,
       { withCredentials: true }
     );
     return data;
   }
 );
 
+// Delete a task
 export const deleteTask = createAsyncThunk(
   'tasks/deleteTask',
   async (id: string) => {

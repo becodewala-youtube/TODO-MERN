@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../store';
+import { useSelector } from 'react-redux';
+import { RootState, useAppDispatch } from '../store'; // Correct import for useAppDispatch
 import { updateProfile } from '../store/slices/authSlice';
+import { AxiosError } from 'axios'; // Import AxiosError to properly type the error
+
+// Define a type for the error response data
+interface ErrorResponse {
+  message: string;
+  // You can add more properties if the API returns additional data
+}
+
 
 const Profile = () => {
   const { user, loading } = useSelector((state: RootState) => state.auth);
   const { isDark } = useSelector((state: RootState) => state.theme);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch(); // Use the typed dispatch hook
 
   const [name, setName] = useState(user?.name || '');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -24,37 +32,26 @@ const Profile = () => {
     }
 
     try {
-      await dispatch(
-        updateProfile({
-          name,
-          currentPassword,
-          newPassword,
-        })
-      );
+      await dispatch(updateProfile({ name, currentPassword, newPassword }));
       setMessage('Profile updated successfully');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (error) {
-      setMessage(error.message);
+      const axiosError = error as AxiosError<ErrorResponse>; // Correct error typing
+      setMessage(axiosError?.response?.data?.message || 'An error occurred');
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div
-        className={`${
-          isDark ? 'bg-gray-800 text-white' : 'bg-white'
-        } rounded-lg shadow-md p-6`}
-      >
+      <div className={`${isDark ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md p-6`}>
         <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
 
         {message && (
           <div
             className={`p-4 rounded-md mb-6 ${
-              message.includes('success')
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700'
+              message.includes('success') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
             }`}
           >
             {message}
@@ -74,9 +71,7 @@ const Profile = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Email (cannot be changed)
-            </label>
+            <label className="block text-sm font-medium mb-2">Email (cannot be changed)</label>
             <input
               type="email"
               value={user?.email}
@@ -89,9 +84,7 @@ const Profile = () => {
             <h3 className="text-lg font-semibold mb-4">Change Password</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Current Password
-                </label>
+                <label className="block text-sm font-medium mb-2">Current Password</label>
                 <input
                   type="password"
                   value={currentPassword}
@@ -101,9 +94,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  New Password
-                </label>
+                <label className="block text-sm font-medium mb-2">New Password</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -114,9 +105,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Confirm New Password
-                </label>
+                <label className="block text-sm font-medium mb-2">Confirm New Password</label>
                 <input
                   type="password"
                   value={confirmPassword}

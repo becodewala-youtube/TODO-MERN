@@ -1,27 +1,31 @@
-
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
 import { useDispatch, useSelector } from 'react-redux';
 import { Sun, Moon, LogOut, User } from 'lucide-react';
 import { toggleTheme } from '../store/slices/themeSlice';
 import { logout } from '../store/slices/authSlice';  // Import logout action
 import { RootState } from '../store';
+import { AppDispatch } from '../store'; // Import AppDispatch type
 
 const Navbar = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>(); // Use AppDispatch to type dispatch
   const navigate = useNavigate();
   const { isDark } = useSelector((state: RootState) => state.theme);
   const { user } = useSelector((state: RootState) => state.auth);
 
   // Handle logout functionality
-  const handleLogout = async () => {
-    await dispatch(logout()); // Dispatch logout action
-    navigate('/login'); // Redirect to login page after logout
+  const handleLogout = () => {
+    dispatch(logout()) // Dispatch logout action
+      .unwrap() // Unwrap the promise to handle result or error
+      .then(() => {
+        navigate('/login'); // Redirect to login page after successful logout
+      })
+      .catch((error) => {
+        console.error('Logout failed: ', error);
+      });
   };
 
   return (
-    <nav className={`${
-      isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-    } shadow-md`}>
+    <nav className={`${isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} shadow-md`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="text-xl font-bold">

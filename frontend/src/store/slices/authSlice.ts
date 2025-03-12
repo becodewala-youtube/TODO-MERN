@@ -19,6 +19,7 @@ const initialState: AuthState = {
   error: null,
 };
 
+// Async actions for login, register, logout, and profile update
 export const login = createAsyncThunk(
   'auth/login',
   async ({ email, password }: { email: string; password: string }) => {
@@ -26,7 +27,7 @@ export const login = createAsyncThunk(
       email,
       password,
     }, { withCredentials: true });
-    
+
     // Persist user data in localStorage on login
     localStorage.setItem('user', JSON.stringify(data));
 
@@ -42,7 +43,7 @@ export const register = createAsyncThunk(
       email,
       password,
     }, { withCredentials: true });
-    
+
     // Persist user data in localStorage on registration
     localStorage.setItem('user', JSON.stringify(data));
 
@@ -73,7 +74,7 @@ export const updateProfile = createAsyncThunk(
       },
       { withCredentials: true }
     );
-    
+
     // Update the user data in localStorage if it changes
     localStorage.setItem('user', JSON.stringify(data));
 
