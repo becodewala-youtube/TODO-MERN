@@ -14,16 +14,24 @@ connectDB();
 
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+// Middleware for CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:5173' : process.env.FRONTEND_URL,
+  origin: process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:5173' 
+    : process.env.FRONTEND_URL || 'http://localhost:5173',  // Fallback for missing FRONTEND_URL
   credentials: true,
 }));
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Routes
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
+
+// Handle preflight for all routes
+app.options('*', cors());
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
