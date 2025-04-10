@@ -1,4 +1,3 @@
-// components/TaskModal.tsx
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { X } from 'lucide-react';
@@ -14,54 +13,61 @@ interface TaskModalProps {
     description: string;
     priority: 'low' | 'medium' | 'high';
     dueDate: string;
-    status: 'pending' | 'completed';  // Make sure status is included here
+    status: 'pending' | 'completed';
   } | null;
 }
 
 const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
-  const dispatch = useDispatch<AppDispatch>();  // Dispatch with AppDispatch
+  const dispatch = useDispatch<AppDispatch>();
   const { isDark } = useSelector((state: RootState) => state.theme);
 
+  // State for task fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
   const [dueDate, setDueDate] = useState('');
-  const [status, setStatus] = useState<'pending' | 'completed'>('pending'); // Default to 'pending'
+  const [status, setStatus] = useState<'pending' | 'completed'>('pending');
 
+  // Reset form fields when modal opens for creating a new task
   useEffect(() => {
     if (task) {
+      // Populate form fields with task data for editing
       setTitle(task.title);
       setDescription(task.description);
       setPriority(task.priority);
-      setDueDate(task.dueDate);
-      setStatus(task.status);  // Set status from existing task
+      const formatedDate = task.dueDate.split('T')[0] || '';
+      setDueDate(formatedDate)
+      setStatus(task.status);
+    } else {
+      // Reset form fields for creating a new task
+      setTitle('');
+      setDescription('');
+      setPriority('low');
+      setDueDate('');
+      setStatus('pending');
     }
-  }, [task]);
+  }, [task, isOpen]); // Re-run whenever task or isOpen changes
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const taskData = {
-      title,
-      description,
-      priority,
-      dueDate,
-      status, // Ensure we are passing the correct status
-    };
+    const taskData = { title, description, priority, dueDate, status };
 
     if (task) {
+      // Update existing task
       await dispatch(updateTask({ id: task._id, task: taskData }));
     } else {
+      // Create new task
       await dispatch(createTask(taskData));
     }
-    onClose();
+    onClose(); // Close modal after submission
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center">
       <div
-        className={`bg-white p-6 rounded-lg shadow-lg ${isDark ? 'bg-gray-800 text-white' : ''}`}
+        className={`p-6 rounded-lg shadow-lg ${isDark ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
         style={{ maxWidth: '500px', width: '100%' }}
       >
         <div className="flex justify-between items-center">
@@ -129,7 +135,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ isOpen, onClose, task }) => {
             </select>
           </div>
           <div className="flex justify-end">
-            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">
               {task ? 'Update Task' : 'Create Task'}
             </button>
           </div>
